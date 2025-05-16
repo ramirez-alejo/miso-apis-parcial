@@ -1,6 +1,6 @@
 
-import { LibroEntity } from "src/libro/libro.entity";
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from "typeorm";
+import { LibroEntity } from "../libro/libro.entity";
+import { Column, Entity, ManyToMany, PrimaryGeneratedColumn } from "typeorm";
 
 @Entity('biblioteca')
 export class BibliotecaEntity {
@@ -16,10 +16,12 @@ export class BibliotecaEntity {
   @Column({ length: 50 })
   ciudad: string;
 
-  @Column({ length: 50 })
-  horarioAtencion: string;
+  @Column({ type: 'time' })
+  horaApertura: string;
 
-  @OneToMany(() => LibroEntity, (libro) => libro.biblioteca)
+  @Column({ type: 'time' })
+  horaCierre: string;
+
+  @ManyToMany(() => LibroEntity, (libro) => libro.bibliotecas)
   libros: LibroEntity[];
 }
-

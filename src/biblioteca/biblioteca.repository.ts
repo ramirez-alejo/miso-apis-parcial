@@ -28,7 +28,7 @@ export class BibliotecaRepository {
         return this.bibliotecaRepository.save(biblioteca);
     }
 
-    async update(id: string, biblioteca: BibliotecaEntity): Promise<BibliotecaEntity> {
+    async update(id: string, biblioteca: Partial<BibliotecaEntity>): Promise<BibliotecaEntity> {
         await this.bibliotecaRepository.update(id, biblioteca);
         return this.findByOne(id);
     }
