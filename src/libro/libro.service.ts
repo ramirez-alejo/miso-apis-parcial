@@ -4,6 +4,8 @@ import { LibroDto, CreateLibroDto, UpdateLibroDto } from "./dto";
 import { Service } from "../shared/service.interface";
 import { LibroMapper } from "./mapper/libro.mapper";
 import { BibliotecaRepository } from "../biblioteca/biblioteca.repository";
+import { BibliotecaDto } from "src/biblioteca/dto";
+import { BibliotecaMapper } from "src/biblioteca/mapper/biblioteca.mapper";
 
 @Injectable()
 export class LibroService implements Service<LibroDto> {

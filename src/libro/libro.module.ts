@@ -5,12 +5,13 @@ import { LibroService } from './libro.service';
 import { LibroRepository } from './libro.repository';
 import { BibliotecaRepository } from '../biblioteca/biblioteca.repository';
 import { BibliotecaEntity } from '../biblioteca/biblioteca.entity';
+import { LibroController } from './libro.controller';
 
 @Module({
     imports: [
         TypeOrmModule.forFeature([LibroEntity, BibliotecaEntity]),
     ],
-    controllers: [],
+    controllers: [LibroController],
     providers: [LibroService, LibroRepository, BibliotecaRepository],
     exports: [LibroService, LibroRepository],
 })
