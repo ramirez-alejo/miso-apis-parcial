@@ -7,6 +7,7 @@ import { LibroDto } from '../libro/dto';
 import { BibliotecaEntity } from './biblioteca.entity';
 import { LibroEntity } from '../libro/libro.entity';
 import { BibliotecaMapper } from './mapper/biblioteca.mapper';
+import { mock } from 'node:test';
 
 describe('BibliotecaService', () => {
   let service: BibliotecaService;
@@ -15,7 +16,7 @@ describe('BibliotecaService', () => {
 
   const mockBibliotecaRepository = {
     findAll: jest.fn(),
-    findByOne: jest.fn(),
+    findOne: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -24,6 +25,7 @@ describe('BibliotecaService', () => {
   const mockLibroRepository = {
     findBooksFromLibrary: jest.fn(),
     findBookFromLibrary: jest.fn(),
+    findOne: jest.fn(),
     create: jest.fn(),
     updateBooksFromLibrary: jest.fn(),
     deleteBookFromLibrary: jest.fn(),
@@ -94,20 +96,20 @@ describe('BibliotecaService', () => {
         libros: [],
       };
 
-      mockBibliotecaRepository.findByOne.mockResolvedValue(bibliotecaEntity);
+      mockBibliotecaRepository.findOne.mockResolvedValue(bibliotecaEntity);
 
       // Act
       const result = await service.findOne('1');
 
       // Assert
-      expect(mockBibliotecaRepository.findByOne).toHaveBeenCalledWith('1');
+      expect(mockBibliotecaRepository.findOne).toHaveBeenCalledWith('1');
       expect(result.id).toBe('1');
       expect(result.nombre).toBe('Biblioteca Nacional');
     });
 
     it('should throw an error if biblioteca not found', async () => {
       // Arrange
-      mockBibliotecaRepository.findByOne.mockRejectedValue(new Error('Biblioteca with id 999 not found'));
+      mockBibliotecaRepository.findOne.mockRejectedValue(new Error('Biblioteca with id 999 not found'));
 
       // Act & Assert
       await expect(service.findOne('999')).rejects.toThrowError('Biblioteca with id 999 not found');
@@ -240,7 +242,7 @@ describe('BibliotecaService', () => {
         libros: [],
       };
 
-      mockBibliotecaRepository.findByOne.mockResolvedValue(existingBibliotecaEntity);
+      mockBibliotecaRepository.findOne.mockResolvedValue(existingBibliotecaEntity);
       
       jest.spyOn(BibliotecaMapper, 'toEntityFromUpdate').mockImplementation(() => {
         throw new Error('BibliotecaMapper.toEntityFromUpdate should not be called');
@@ -250,7 +252,7 @@ describe('BibliotecaService', () => {
       await expect(service.update('1', updateBibliotecaDto)).rejects.toThrowError(
         'La hora de apertura debe ser menor que la hora de cierre'
       );
-      expect(mockBibliotecaRepository.findByOne).toHaveBeenCalledWith('1');
+      expect(mockBibliotecaRepository.findOne).toHaveBeenCalledWith('1');
     });
   });
 
@@ -291,14 +293,14 @@ describe('BibliotecaService', () => {
         },
       ];
 
-      mockBibliotecaRepository.findByOne.mockResolvedValue(bibliotecaEntity);
+      mockBibliotecaRepository.findOne.mockResolvedValue(bibliotecaEntity);
       mockLibroRepository.findBooksFromLibrary.mockResolvedValue(libroEntities);
 
       // Act
       const result = await service.findBibliotecaWithLibros('1');
 
       // Assert
-      expect(mockBibliotecaRepository.findByOne).toHaveBeenCalledWith('1');
+      expect(mockBibliotecaRepository.findOne).toHaveBeenCalledWith('1');
       expect(mockLibroRepository.findBooksFromLibrary).toHaveBeenCalledWith('1');
       expect(result.id).toBe('1');
       expect(result.nombre).toBe('Biblioteca Nacional');
@@ -320,13 +322,14 @@ describe('BibliotecaService', () => {
         libros: [],
       };
 
-      const createLibroDto = {
-        titulo: 'Nuevo Libro',
-        autor: 'Autor Nuevo',
-        fechaPublicacion: '2023-01-01',
-        isbn: '9781234567897',
-        bibliotecaId: '1',
-      };
+      const libroDto = {
+          id: '1',
+          titulo: 'El Quijote',
+          autor: 'Miguel de Cervantes',
+          fechaPublicacion: new Date('1605-01-01'),
+          isbn: '1234567890123',
+          bibliotecas: [],
+        };
 
       const savedLibroEntity: LibroEntity = {
         id: '2',
@@ -337,14 +340,16 @@ describe('BibliotecaService', () => {
         bibliotecas: [bibliotecaEntity],
       };
 
-      mockBibliotecaRepository.findByOne.mockResolvedValue(bibliotecaEntity);
+      mockBibliotecaRepository.findOne.mockResolvedValue(bibliotecaEntity);
       mockLibroRepository.create.mockResolvedValue(savedLibroEntity);
 
+      mockLibroRepository.findOne.mockResolvedValue(libroDto);
+
       // Act
-      const result = await service.addLibroToBiblioteca('1', createLibroDto);
+      const result = await service.addLibroToBiblioteca('1', libroDto);
 
       // Assert
-      expect(mockBibliotecaRepository.findByOne).toHaveBeenCalledWith('1');
+      expect(mockBibliotecaRepository.findOne).toHaveBeenCalledWith('1');
       expect(mockLibroRepository.create).toHaveBeenCalled();
       expect(result.id).toBe('2');
       expect(result.titulo).toBe('Nuevo Libro');

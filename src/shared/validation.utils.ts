@@ -6,7 +6,7 @@ export class ValidationUtils {
     if (!id || id.trim() === '') {
       throw new BusinessError(
         `El ID del ${entityName} no puede estar vacío`,
-        BusinessErrorType.BAD_REQUEST,
+        BusinessErrorType.BAD_REQUEST
       );
     }
     
@@ -14,7 +14,7 @@ export class ValidationUtils {
     if (!uuidRegex.test(id)) {
       throw new BusinessError(
         `El ID del ${entityName} no tiene un formato válido`,
-        BusinessErrorType.BAD_REQUEST,
+        BusinessErrorType.BAD_REQUEST
       );
     }
   }

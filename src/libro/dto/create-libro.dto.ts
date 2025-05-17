@@ -21,6 +21,5 @@ export class CreateLibroDto {
   @IsISBN(undefined, { message: 'El ISBN debe tener un formato válido' })
   isbn: string;
 
-  @IsNotEmpty()
   bibliotecaId: string;
 }

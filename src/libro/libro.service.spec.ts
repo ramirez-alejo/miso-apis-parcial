@@ -13,7 +13,7 @@ describe('LibroService', () => {
 
   const mockLibroRepository = {
     findAll: jest.fn(),
-    findByOne: jest.fn(),
+    findOne: jest.fn(),
     create: jest.fn(),
     update: jest.fn(),
     delete: jest.fn(),
@@ -24,7 +24,7 @@ describe('LibroService', () => {
   };
 
   const mockBibliotecaRepository = {
-    findByOne: jest.fn(),
+    findOne: jest.fn(),
   };
 
   beforeEach(async () => {
@@ -113,20 +113,20 @@ describe('LibroService', () => {
         bibliotecas: [bibliotecaEntity],
       };
 
-      mockLibroRepository.findByOne.mockResolvedValue(libroEntity);
+      mockLibroRepository.findOne.mockResolvedValue(libroEntity);
 
       // Act
       const result = await service.findOne('1');
 
       // Assert
-      expect(mockLibroRepository.findByOne).toHaveBeenCalledWith('1');
+      expect(mockLibroRepository.findOne).toHaveBeenCalledWith('1');
       expect(result.id).toBe('1');
       expect(result.titulo).toBe('El Quijote');
     });
 
     it('should throw an error if libro not found', async () => {
       // Arrange
-      mockLibroRepository.findByOne.mockRejectedValue(new Error('Libro with id 999 not found'));
+      mockLibroRepository.findOne.mockRejectedValue(new Error('Libro with id 999 not found'));
 
       // Act & Assert
       await expect(service.findOne('999')).rejects.toThrowError('Libro with id 999 not found');
@@ -163,14 +163,14 @@ describe('LibroService', () => {
         bibliotecas: [bibliotecaEntity],
       };
 
-      mockBibliotecaRepository.findByOne.mockResolvedValue(bibliotecaEntity);
+      mockBibliotecaRepository.findOne.mockResolvedValue(bibliotecaEntity);
       mockLibroRepository.create.mockResolvedValue(libroEntity);
 
       // Act
       const result = await service.create(createLibroDto);
 
       // Assert
-      expect(mockBibliotecaRepository.findByOne).toHaveBeenCalledWith('1');
+      expect(mockBibliotecaRepository.findOne).toHaveBeenCalledWith('1');
       expect(mockLibroRepository.create).toHaveBeenCalled();
       expect(result.id).toBe('2');
       expect(result.titulo).toBe('Nuevo Libro');
@@ -201,7 +201,7 @@ describe('LibroService', () => {
       const result = await service.create(createLibroDto);
 
       // Assert
-      expect(mockBibliotecaRepository.findByOne).not.toHaveBeenCalled();
+      expect(mockBibliotecaRepository.findOne).not.toHaveBeenCalled();
       expect(mockLibroRepository.create).toHaveBeenCalled();
       expect(result.id).toBe('3');
       expect(result.titulo).toBe('Libro Sin Biblioteca');
@@ -280,8 +280,8 @@ describe('LibroService', () => {
         bibliotecas: [nuevaBibliotecaEntity],
       };
 
-      mockBibliotecaRepository.findByOne.mockResolvedValue(nuevaBibliotecaEntity);
-      mockLibroRepository.findByOne.mockResolvedValue(existingLibroEntity);
+      mockBibliotecaRepository.findOne.mockResolvedValue(nuevaBibliotecaEntity);
+      mockLibroRepository.findOne.mockResolvedValue(existingLibroEntity);
       mockLibroRepository.create.mockResolvedValue(existingLibroEntity);
       mockLibroRepository.update.mockResolvedValue(updatedLibroEntity);
 
@@ -289,8 +289,8 @@ describe('LibroService', () => {
       const result = await service.update('1', updateLibroDto);
 
       // Assert
-      expect(mockBibliotecaRepository.findByOne).toHaveBeenCalledWith('2');
-      expect(mockLibroRepository.findByOne).toHaveBeenCalledWith('1');
+      expect(mockBibliotecaRepository.findOne).toHaveBeenCalledWith('2');
+      expect(mockLibroRepository.findOne).toHaveBeenCalledWith('1');
       expect(mockLibroRepository.update).toHaveBeenCalled();
       expect(result.id).toBe('1');
       expect(result.titulo).toBe('Libro Actualizado');
@@ -315,12 +315,12 @@ describe('LibroService', () => {
       it('should add a book to a library', async () => {
         // Arrange
         const bibliotecaId = '1';
-        const createLibroDto: CreateLibroDto = {
+        const libroDto: LibroDto = {
           titulo: 'Nuevo Libro',
           autor: 'Autor Nuevo',
-          fechaPublicacion: '2023-01-01',
+          id: '2',
           isbn: '9781234567897',
-          bibliotecaId: '1',
+          fechaPublicacion: new Date('2023-01-01'),
         };
 
         const bibliotecaEntity: BibliotecaEntity = {
@@ -342,14 +342,14 @@ describe('LibroService', () => {
           bibliotecas: [bibliotecaEntity],
         };
 
-        mockBibliotecaRepository.findByOne.mockResolvedValue(bibliotecaEntity);
+        mockBibliotecaRepository.findOne.mockResolvedValue(bibliotecaEntity);
         mockLibroRepository.create.mockResolvedValue(libroEntity);
 
         // Act
-        const result = await service.addBookToLibrary(bibliotecaId, createLibroDto);
+        const result = await service.addBookToLibrary(bibliotecaId, libroDto);
 
         // Assert
-        expect(mockBibliotecaRepository.findByOne).toHaveBeenCalledWith(bibliotecaId);
+        expect(mockBibliotecaRepository.findOne).toHaveBeenCalledWith(bibliotecaId);
         expect(mockLibroRepository.create).toHaveBeenCalled();
         expect(result.id).toBe('2');
         expect(result.titulo).toBe('Nuevo Libro');
@@ -389,14 +389,14 @@ describe('LibroService', () => {
           },
         ];
 
-        mockBibliotecaRepository.findByOne.mockResolvedValue(bibliotecaEntity);
+        mockBibliotecaRepository.findOne.mockResolvedValue(bibliotecaEntity);
         mockLibroRepository.findBooksFromLibrary.mockResolvedValue(libroEntities);
 
         // Act
         const result = await service.findBooksFromLibrary(bibliotecaId);
 
         // Assert
-        expect(mockBibliotecaRepository.findByOne).toHaveBeenCalledWith(bibliotecaId);
+        expect(mockBibliotecaRepository.findOne).toHaveBeenCalledWith(bibliotecaId);
         expect(mockLibroRepository.findBooksFromLibrary).toHaveBeenCalledWith(bibliotecaId);
         expect(result).toHaveLength(2);
         expect(result[0].titulo).toBe('El Quijote');
@@ -480,19 +480,6 @@ describe('LibroService', () => {
       });
     });
 
-    describe('deleteBookFromLibrary', () => {
-      it('should delete a book from a library', async () => {
-        // Arrange
-        const bibliotecaId = '1';
-        const libroId = '1';
-        mockLibroRepository.deleteBookFromLibrary.mockResolvedValue(undefined);
-
-        // Act
-        await service.deleteBookFromLibrary(bibliotecaId, libroId);
-
-        // Assert
-        expect(mockLibroRepository.deleteBookFromLibrary).toHaveBeenCalledWith(libroId, bibliotecaId);
-      });
-    });
+    
   });
 });

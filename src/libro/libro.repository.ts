@@ -2,6 +2,7 @@ import { Injectable } from "@nestjs/common";
 import { LibroEntity } from "./libro.entity";
 import { Repository as TypeOrmRepository } from 'typeorm';
 import { InjectRepository } from "@nestjs/typeorm";
+import { BusinessError, BusinessErrorType } from "../shared/business-error";
 
 @Injectable()
 export class LibroRepository {
@@ -14,12 +15,12 @@ export class LibroRepository {
         return this.libroRepository.find();
     }
     
-    async findByOne(id: string): Promise<LibroEntity> {
+    async findOne(id: string): Promise<LibroEntity> {
         const libro = await this.libroRepository.findOne({ 
             where: { id } 
         });
         if (!libro) {
-            throw new Error(`Libro with id ${id} not found`);
+            throw new BusinessError(`Libro con id ${id} no encontrado`, BusinessErrorType.NOT_FOUND);
         }
         return libro;
     }
@@ -30,13 +31,13 @@ export class LibroRepository {
     
     async update(id: string, libro: Partial<LibroEntity>): Promise<LibroEntity> {
         await this.libroRepository.update(id, libro);
-        return this.findByOne(id);
+        return this.findOne(id);
     }
     
     async delete(id: string): Promise<void> {
         const result = await this.libroRepository.delete(id);
         if (result.affected === 0) {
-            throw new Error(`Libro with id ${id} not found`);
+            throw new BusinessError(`Libro con id ${id} no encontrado`, BusinessErrorType.NOT_FOUND);
         }
     }
     
@@ -51,7 +52,7 @@ export class LibroRepository {
             where: { id, bibliotecas: { id: bibliotecaId } }
         });
         if (!libro) {
-            throw new Error(`Libro with id ${id} not found in biblioteca with id ${bibliotecaId}`);
+            throw new BusinessError(`Libro con id ${id} no encontrado en biblioteca con id ${bibliotecaId}`, BusinessErrorType.NOT_FOUND);
         }
         return libro;
     }
@@ -62,9 +63,17 @@ export class LibroRepository {
     }
 
     async deleteBookFromLibrary(id: string, bibliotecaId: string): Promise<void> {
-        const result = await this.libroRepository.delete({ id, bibliotecas: { id: bibliotecaId } });
-        if (result.affected === 0) {
-            throw new Error(`Libro with id ${id} not found in biblioteca with id ${bibliotecaId}`);
+        // load the book with the realationship0
+        const libro = await this.libroRepository.findOne({
+            where: { id, bibliotecas: { id: bibliotecaId } },
+            relations: ['bibliotecas']
+        });
+        if (!libro) {
+            throw new BusinessError(`Libro con id ${id} no encontrado en biblioteca con id ${bibliotecaId}`, BusinessErrorType.NOT_FOUND);
         }
+
+        libro.bibliotecas = libro.bibliotecas.filter(b => b.id !== bibliotecaId);
+        await this.libroRepository.save(libro);
+        
     }
 }

@@ -1,0 +1,252 @@
+{
+	"info": {
+		"_postman_id": "1286be04-5765-41d0-8394-f397f4c37695",
+		"name": "Libraries Collection",
+		"description": "Collection for testing library operations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4872632"
+	},
+	"item": [
+		{
+			"name": "Create Valid Library",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombre\": \"Biblioteca Nacional\",\n    \"direccion\": \"Calle 24 # 5-60\",\n    \"ciudad\": \"Bogotá\",\n    \"horaApertura\": \"08:00:00\",\n    \"horaCierre\": \"20:00:00\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/libraries",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries"
+					]
+				},
+				"description": "Creates a new library with valid data"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Invalid Library",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombre\": \"\",\n    \"direccion\": \"\",\n    \"ciudad\": \"\",\n    \"horaApertura\": \"25:00:00\",\n    \"horaCierre\": \"20:00:00\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/libraries",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries"
+					]
+				},
+				"description": "Attempts to create a library with invalid data"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Invalid Library Horario",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombre\": \"Biblioteca Nacional\",\n    \"direccion\": \"Calle 24 # 5-60\",\n    \"ciudad\": \"Bogotá\",\n    \"horaApertura\": \"20:00:00\",\n    \"horaCierre\": \"18:00:00\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/libraries",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries"
+					]
+				},
+				"description": "Attempts to create a library with invalid data"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Libraries",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/libraries",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries"
+					]
+				},
+				"description": "Retrieves all libraries"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Library by Valid ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/libraries/{{validLibraryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries",
+						"{{validLibraryId}}"
+					]
+				},
+				"description": "Retrieves a library using a valid ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Library by Invalid ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/libraries/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				},
+				"description": "Attempts to retrieve a library using a non-existent ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Valid Library",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombre\": \"Biblioteca Nacional Updated\",\n    \"direccion\": \"Nueva Calle 24 # 5-60\",\n    \"ciudad\": \"Bogotá DC\",\n    \"horaApertura\": \"09:00:00\",\n    \"horaCierre\": \"21:00:00\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/libraries/{{validLibraryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries",
+						"{{validLibraryId}}"
+					]
+				},
+				"description": "Updates an existing library with valid data"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Library with Invalid ID",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"nombre\": \"Biblioteca Nacional Updated\",\n    \"direccion\": \"Nueva Calle 24 # 5-60\",\n    \"ciudad\": \"Bogotá DC\",\n    \"horaApertura\": \"09:00:00\",\n    \"horaCierre\": \"21:00:00\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/libraries/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				},
+				"description": "Attempts to update a library using a non-existent ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Valid Library",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/libraries/{{validLibraryId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries",
+						"{{validLibraryId}}"
+					]
+				},
+				"description": "Deletes an existing library"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Library with Invalid ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/libraries/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"libraries",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				},
+				"description": "Attempts to delete a library using a non-existent ID"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1"
+		},
+		{
+			"key": "validLibraryId",
+			"value": ""
+		}
+	]
+}

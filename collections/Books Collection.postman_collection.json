@@ -1,0 +1,225 @@
+{
+	"info": {
+		"_postman_id": "ecb4d677-c25a-4482-92e0-1a3a425b3516",
+		"name": "Books Collection",
+		"description": "Collection for testing book operations",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "4872632"
+	},
+	"item": [
+		{
+			"name": "Create Valid Book",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"titulo\": \"El Quijote\",\n    \"autor\": \"Miguel de Cervantes\",\n    \"fechaPublicacion\": \"1605-01-01\",\n    \"isbn\": \"9788408096245\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/books",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books"
+					]
+				},
+				"description": "Creates a new book with valid data"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Invalid Book",
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"titulo\": \"\",\n    \"autor\": \"\",\n    \"fechaPublicacion\": \"invalid-date\",\n    \"isbn\": \"invalid-isbn\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/books",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books"
+					]
+				},
+				"description": "Attempts to create a book with invalid data"
+			},
+			"response": []
+		},
+		{
+			"name": "Get All Books",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/books",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books"
+					]
+				},
+				"description": "Retrieves all books"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Book by Valid ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/books/{{validBookId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books",
+						"{{validBookId}}"
+					]
+				},
+				"description": "Retrieves a book using a valid ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Get Book by Invalid ID",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/books/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				},
+				"description": "Attempts to retrieve a book using a non-existent ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Valid Book",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"titulo\": \"Don Quijote de la Mancha\",\n    \"autor\": \"Miguel de Cervantes Saavedra\",\n    \"fechaPublicacion\": \"1605-01-01\",\n    \"isbn\": \"9788408096245\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/books/{{validBookId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books",
+						"{{validBookId}}"
+					]
+				},
+				"description": "Updates an existing book with valid data"
+			},
+			"response": []
+		},
+		{
+			"name": "Update Book with Invalid ID",
+			"request": {
+				"method": "PUT",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"titulo\": \"Don Quijote de la Mancha\",\n    \"autor\": \"Miguel de Cervantes Saavedra\",\n    \"fechaPublicacion\": \"1605-01-01\",\n    \"isbn\": \"9788408096245\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/books/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				},
+				"description": "Attempts to update a book using a non-existent ID"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Valid Book",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/books/{{validBookId}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books",
+						"{{validBookId}}"
+					]
+				},
+				"description": "Deletes an existing book"
+			},
+			"response": []
+		},
+		{
+			"name": "Delete Book with Invalid ID",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/books/00000000-0000-0000-0000-000000000000",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"books",
+						"00000000-0000-0000-0000-000000000000"
+					]
+				},
+				"description": "Attempts to delete a book using a non-existent ID"
+			},
+			"response": []
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000/api/v1"
+		},
+		{
+			"key": "validBookId",
+			"value": ""
+		}
+	]
+}

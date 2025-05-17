@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Put, Delete, Param, Body, UseInterceptors } from '@nestjs/common';
+import { Controller, Get, Post, Put, Delete, Param, Body, UseInterceptors, HttpCode } from '@nestjs/common';
 import { BusinessErrorsInterceptor } from '../shared/interceptors/business-errors.interceptor';
 import { LibroService } from './libro.service';
 import { LibroDto, CreateLibroDto, UpdateLibroDto, LibroWithBibliotecaDto } from './dto';
 import { ValidationUtils } from '../shared/validation.utils';
 import { BibliotecaDto } from '../biblioteca/dto';
+import { BusinessError, BusinessErrorType } from '../shared/business-error';
 
 @Controller('books')
 @UseInterceptors(BusinessErrorsInterceptor)
@@ -17,7 +18,6 @@ export class LibroController {
 
     @Get(':id')
     async findOne(@Param('id') id: string): Promise<LibroDto> {
-        ValidationUtils.validateUUID(id, 'libro');
         return await this.libroService.findOne(id);
     }
 
@@ -28,13 +28,12 @@ export class LibroController {
 
     @Put(':id')
     async update(@Param('id') id: string, @Body() updateLibroDto: UpdateLibroDto): Promise<LibroDto> {
-        ValidationUtils.validateUUID(id, 'libro');
         return await this.libroService.update(id, updateLibroDto);
     }
 
     @Delete(':id')
+    @HttpCode(204)
     async delete(@Param('id') id: string): Promise<void> {
-        ValidationUtils.validateUUID(id, 'libro');
         return await this.libroService.delete(id);
     }
 }

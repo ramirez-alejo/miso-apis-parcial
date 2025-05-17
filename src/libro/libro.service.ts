@@ -4,8 +4,7 @@ import { LibroDto, CreateLibroDto, UpdateLibroDto } from "./dto";
 import { Service } from "../shared/service.interface";
 import { LibroMapper } from "./mapper/libro.mapper";
 import { BibliotecaRepository } from "../biblioteca/biblioteca.repository";
-import { BibliotecaDto } from "src/biblioteca/dto";
-import { BibliotecaMapper } from "src/biblioteca/mapper/biblioteca.mapper";
+import { BusinessError, BusinessErrorType } from "../shared/business-error";
 
 @Injectable()
 export class LibroService implements Service<LibroDto> {
@@ -20,86 +19,180 @@ export class LibroService implements Service<LibroDto> {
     }
 
     async findOne(id: string): Promise<LibroDto> {
-        const entity = await this.libroRepository.findByOne(id);
-        return LibroMapper.toDto(entity);
+        try {
+            const entity = await this.libroRepository.findOne(id);
+            return LibroMapper.toDto(entity);
+        } catch (error) {
+            throw new BusinessError(
+                `Libro with id ${id} not found`,
+                BusinessErrorType.NOT_FOUND
+            );
+        }
     }
 
     async create(createLibroDto: CreateLibroDto): Promise<LibroDto> {
 
+        // Validar que la fecha  de publicación sea menor o igual a la fecha actual
+        const fechaPublicacion = new Date(createLibroDto.fechaPublicacion);
+        const fechaActual = new Date();
+        if (fechaPublicacion > fechaActual) {
+            throw new BusinessError(
+                'La fecha de publicación no puede ser mayor a la fecha actual',
+                BusinessErrorType.PRECONDITION_FAILED
+            );
+        }
+
         const entity = LibroMapper.toEntityFromCreate(createLibroDto);
         
         if (createLibroDto.bibliotecaId) {
-            const biblioteca = await this.bibliotecaRepository.findByOne(createLibroDto.bibliotecaId);
-            entity.bibliotecas = [biblioteca];
+            try {
+                const biblioteca = await this.bibliotecaRepository.findOne(createLibroDto.bibliotecaId);
+                entity.bibliotecas = [biblioteca];
+            } catch (error) {
+                throw new BusinessError(
+                    `Biblioteca with id ${createLibroDto.bibliotecaId} not found`,
+                    BusinessErrorType.NOT_FOUND
+                );
+            }
         }
         
         const savedEntity = await this.libroRepository.create(entity);
-        
         return LibroMapper.toDto(savedEntity);
     }
 
     async update(id: string, updateLibroDto: UpdateLibroDto): Promise<LibroDto> {
+
+        if (updateLibroDto.fechaPublicacion) {
+            // Validar que la fecha  de publicación sea menor o igual a la fecha actual
+            const fechaPublicacion = new Date(updateLibroDto.fechaPublicacion);
+            const fechaActual = new Date();
+            if (fechaPublicacion > fechaActual) {
+                throw new BusinessError(
+                    'La fecha de publicación no puede ser mayor a la fecha actual',
+                    BusinessErrorType.PRECONDITION_FAILED
+                );
+            }
+        }
+
         const entity = LibroMapper.toEntityFromUpdate(updateLibroDto);
         
         if (updateLibroDto.bibliotecaId) {
-            const biblioteca = await this.bibliotecaRepository.findByOne(updateLibroDto.bibliotecaId);
-            const libro = await this.libroRepository.findByOne(id);
-            libro.bibliotecas = libro.bibliotecas || [];
-            
-            if (!libro.bibliotecas.some(b => b.id === biblioteca.id)) {
-                libro.bibliotecas.push(biblioteca);
-                await this.libroRepository.create(libro); // Save the relationship
+            try {
+                const biblioteca = await this.bibliotecaRepository.findOne(updateLibroDto.bibliotecaId);
+                const libro = await this.libroRepository.findOne(id);
+                libro.bibliotecas = libro.bibliotecas || [];
+                
+                if (!libro.bibliotecas.some(b => b.id === biblioteca.id)) {
+                    libro.bibliotecas.push(biblioteca);
+                    await this.libroRepository.create(libro);
+                }
+            } catch (error) {
+                throw new BusinessError(
+                    `Libro with id ${id} or Biblioteca with id ${updateLibroDto.bibliotecaId} not found`,
+                    BusinessErrorType.NOT_FOUND
+                );
             }
         }
         
-        const updatedEntity = await this.libroRepository.update(id, entity);
-        
-        return LibroMapper.toDto(updatedEntity);
+        try {
+            const updatedEntity = await this.libroRepository.update(id, entity);
+            return LibroMapper.toDto(updatedEntity);
+        } catch (error) {
+            throw new BusinessError(
+                `Libro with id ${id} not found`,
+                BusinessErrorType.NOT_FOUND
+            );
+        }
     }
 
     async delete(id: string): Promise<void> {
-        await this.libroRepository.delete(id);
+        try {
+            await this.libroRepository.delete(id);
+        } catch (error) {
+            throw new BusinessError(
+                `Libro with id ${id} not found`,
+                BusinessErrorType.NOT_FOUND
+            );
+        }
     }
 
-
-    async addBookToLibrary(bibliotecaId: string, createLibroDto: CreateLibroDto): Promise<LibroDto> {
-        // Ensure the biblioteca exists
-        const biblioteca = await this.bibliotecaRepository.findByOne(bibliotecaId);
-        
-        const entity = LibroMapper.toEntityFromCreate(createLibroDto);
-        
-        if (!entity.bibliotecas.some(b => b.id === biblioteca.id)) {
-            entity.bibliotecas.push(biblioteca);
+    async addBookToLibrary(bibliotecaId: string, libroDto: LibroDto): Promise<LibroDto> {
+        try {
+            const biblioteca = await this.bibliotecaRepository.findOne(bibliotecaId);
+            const entity = await this.libroRepository.findOne(libroDto.id);
+            if (!entity) {
+                throw new BusinessError(
+                    `Libro with id ${libroDto.id} not found`,
+                    BusinessErrorType.NOT_FOUND
+                );
+            }
+            
+            if (!entity.bibliotecas.some(b => b.id === biblioteca.id)) {
+                entity.bibliotecas.push(biblioteca);
+            } else {
+                throw new BusinessError(
+                    'El libro ya está asociado a esta biblioteca',
+                    BusinessErrorType.PRECONDITION_FAILED
+                );
+            }
+            
+            const savedEntity = await this.libroRepository.create(entity);
+            return LibroMapper.toDto(savedEntity);
+        } catch (error) {
+            if (error instanceof BusinessError) throw error;
+            throw new BusinessError(
+                `Biblioteca with id ${bibliotecaId} not found`,
+                BusinessErrorType.NOT_FOUND
+            );
         }
-        
-        const savedEntity = await this.libroRepository.create(entity);
-        
-        return LibroMapper.toDto(savedEntity);
     }
 
     async findBooksFromLibrary(bibliotecaId: string): Promise<LibroDto[]> {
-        await this.bibliotecaRepository.findByOne(bibliotecaId);
-        
-        const entities = await this.libroRepository.findBooksFromLibrary(bibliotecaId);
-        
-        return LibroMapper.toDtoList(entities);
+        try {
+            await this.bibliotecaRepository.findOne(bibliotecaId);
+            const entities = await this.libroRepository.findBooksFromLibrary(bibliotecaId);
+            return LibroMapper.toDtoList(entities);
+        } catch (error) {
+            throw new BusinessError(
+                `Biblioteca with id ${bibliotecaId} not found`,
+                BusinessErrorType.NOT_FOUND
+            );
+        }
     }
 
     async findBookFromLibrary(bibliotecaId: string, libroId: string): Promise<LibroDto> {
-        const entity = await this.libroRepository.findBookFromLibrary(libroId, bibliotecaId);
-        
-        return LibroMapper.toDto(entity);
+        try {
+            const entity = await this.libroRepository.findBookFromLibrary(libroId, bibliotecaId);
+            return LibroMapper.toDto(entity);
+        } catch (error) {
+            throw new BusinessError(
+                `Libro with id ${libroId} not found in biblioteca ${bibliotecaId}`,
+                BusinessErrorType.NOT_FOUND
+            );
+        }
     }
 
     async updateBookFromLibrary(bibliotecaId: string, libroId: string, updateLibroDto: UpdateLibroDto): Promise<LibroDto> {
-        const entity = LibroMapper.toEntityFromUpdate(updateLibroDto);
-        
-        const updatedEntity = await this.libroRepository.updateBooksFromLibrary(libroId, entity, bibliotecaId);
-        
-        return LibroMapper.toDto(updatedEntity);
+        try {
+            const entity = LibroMapper.toEntityFromUpdate(updateLibroDto);
+            const updatedEntity = await this.libroRepository.updateBooksFromLibrary(libroId, entity, bibliotecaId);
+            return LibroMapper.toDto(updatedEntity);
+        } catch (error) {
+            throw new BusinessError(
+                `Libro with id ${libroId} not found in biblioteca ${bibliotecaId}`,
+                BusinessErrorType.NOT_FOUND
+            );
+        }
     }
 
     async deleteBookFromLibrary(bibliotecaId: string, libroId: string): Promise<void> {
-        await this.libroRepository.deleteBookFromLibrary(libroId, bibliotecaId);
+        try {
+            await this.libroRepository.deleteBookFromLibrary(libroId, bibliotecaId);
+        } catch (error) {
+            throw new BusinessError(
+                `Libro with id ${libroId} not found in biblioteca ${bibliotecaId}`,
+                BusinessErrorType.NOT_FOUND
+            );
+        }
     }
 }
